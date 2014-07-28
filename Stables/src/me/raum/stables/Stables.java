@@ -305,6 +305,7 @@ public class Stables
       String msg = getlocalConfig().getString(phrase);
       if (var != null) {
         msg = msg.replaceAll("%1", var.toString());
+        
       }
       return msg;
     }
@@ -652,20 +653,21 @@ public class Stables
       }
       if ((args.length >= 1) && (args[0].equalsIgnoreCase("version")))
       {
-        msg(sender, "Stables, by raum266 - version " + plugin.getDescription().getVersion());
+        msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE +  "Stables, by raum266, modified by externo6 - version " + plugin.getDescription().getVersion());
         return true;
       }
       if ((args.length >= 1) && (args[0].equalsIgnoreCase("report")))
       {
-        msg(sender, "Stables Config:");
-        msg(sender, "Debug Mode: " + getConfig().getBoolean("general.Debug"));
-        msg(sender, "Block All: " + getConfig().getBoolean("general.BlockAll"));
-        msg(sender, "Block PVP: " + getConfig().getBoolean("general.PVPDamage"));
-        msg(sender, "Block Environment: " + getConfig().getBoolean("general.EnviromentDamage"));
-        msg(sender, "Block Owner: " + getConfig().getBoolean("general.OwnerDamage"));
-        msg(sender, "Block Mob: " + getConfig().getBoolean("general.MobDamage"));
-        msg(sender, "Allow Theft: " + getConfig().getBoolean("general.Theft"));
-        msg(sender, "Save Time: " + getConfig().getInt("general.Save"));
+        msg(sender, "===============" + ChatColor.GREEN + " [" + ChatColor.DARK_GREEN + "Stables Current Config" + ChatColor.GREEN + "] " + ChatColor.WHITE + "===============");
+        msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "Debug Mode: " + ChatColor.RESET  + getConfig().getBoolean("general.Debug"));
+        msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "Block All: " + ChatColor.RESET  + getConfig().getBoolean("general.BlockAll"));
+        msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "Block PVP: " + ChatColor.RESET  + getConfig().getBoolean("general.PVPDamage"));
+        msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "Mounted PVP Damage: " + ChatColor.RESET  + getConfig().getBoolean("general.AllowPVPMountedDamage"));
+        msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "Block Environment: " + ChatColor.RESET  + getConfig().getBoolean("general.EnviromentDamage"));
+        msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "Block Owner: " + ChatColor.RESET  + getConfig().getBoolean("general.OwnerDamage"));
+        msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "Block Mob: " + ChatColor.RESET  + getConfig().getBoolean("general.MobDamage"));
+        msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "Allow Theft: " + ChatColor.RESET  + getConfig().getBoolean("general.Theft"));
+        msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "Save Time: " + ChatColor.RESET  + getConfig().getInt("general.Save"));
         return true;
       }
       if ((args.length >= 1) && ((args[0].equalsIgnoreCase("check")) || (args[0].equalsIgnoreCase("info"))))
@@ -735,7 +737,7 @@ public class Stables
         catch (Exception e)
         {
           getLogger().warning("Exception while running UUIDFetcher");
-          msg(sender, "Unknown player.");
+          msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE +  "Unknown player.");
           return true;
         }
         String uid = findHorse(oldname, 0, owneruuid);
@@ -762,12 +764,12 @@ public class Stables
       if ((args.length >= 1) && (args[0].equalsIgnoreCase("list")))
       {
         String owner = sender.getName();
-        msg(sender, owner + " " + getLang("LIST_OWNED", null));
+        msg(sender, "======" + ChatColor.GREEN + " [" + ChatColor.DARK_GREEN + owner + " Owns the Following Horses" + ChatColor.GREEN + "] " + ChatColor.WHITE + "======");
         this.rs = queryDB("SELECT uid, tamed, named, x, y, z FROM " + getConfig().getString("MySQL.prefix") + "horses WHERE owner='" + owner + "'");
         try
         {
           while (this.rs.next()) {
-            msg(sender, "Name: " + this.rs.getString(3).replace("`", "'"));
+            msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "Name: " + ChatColor.RESET + this.rs.getString(3).replace("`", "'"));
           }
         }
         catch (SQLException e)
@@ -781,8 +783,8 @@ public class Stables
       {
         if (args.length < 2)
         {
-          syntax(sender, "/stables abandon (horsename)");
-          return true;
+          msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE +  "/stables abandon (horsename)");
+          return true; 
         }
         if (!(sender instanceof Player))
         {
@@ -828,7 +830,7 @@ public class Stables
         Player p = (Player)sender;
         if ((!getConfig().getBoolean("horses.allowTP")) && (!perm(p, "stables.tp")))
         {
-          local(sender, "COMMAND_DISABLED");
+          local(sender,"COMMAND_DISABLED");
           return true;
         }
         String uid = findHorse(args, 1, p.getUniqueId().toString());
@@ -909,7 +911,7 @@ public class Stables
         Player target = Bukkit.getServer().getPlayer(args[1]);
         if (target == null)
         {
-          msg(sender, args[0].toString() + " is not here!");
+          msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE +  args[0].toString() + " is not here!");
           return true;
         }
         if (target.getVehicle() != null)
@@ -918,7 +920,7 @@ public class Stables
           
           target.getVehicle().getPassenger().leaveVehicle();
         }
-        msg(sender, "Done!");
+        msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE +  "Done!");
         return true;
       }
       if ((args.length >= 1) && (args[0].equalsIgnoreCase("find")))
@@ -990,12 +992,12 @@ public class Stables
         {
           owner = getServer().getPlayerExact(args[1].toString()).getName();
         }
-        msg(sender, owner + " " + getLang("LIST_OWNED", null) + ":");
+        msg(sender, "======" + ChatColor.GREEN + " [" + ChatColor.DARK_GREEN + owner + " Owns the Following Horses" + ChatColor.GREEN + "] " + ChatColor.WHITE + "======");
         this.rs = queryDB("SELECT uid, tamed, named, x, y, z FROM " + getConfig().getString("MySQL.prefix") + "horses WHERE owner='" + owner + "'");
         try
         {
           while (this.rs.next()) {
-            msg(sender, "Name: " + this.rs.getString(3).replace("`", "'"));
+            msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "Name: " + ChatColor.RESET + this.rs.getString(3).replace("`", "'"));
           }
         }
         catch (SQLException e)
@@ -1029,7 +1031,7 @@ public class Stables
         writeDB("DELETE FROM " + getConfig().getString("MySQL.prefix") + "stable WHERE owner='" + owner + "'");
         
 
-        msg(sender, "Horses cleared.");
+        msg(sender , ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE +  "Horses cleared.");
         return true;
       }
       if ((args.length >= 1) && (args[0].equalsIgnoreCase("addrider")))
@@ -1088,7 +1090,7 @@ public class Stables
         }
         if (!getConfig().getBoolean("stable.useCommand"))
         {
-          msg(sender, "You are unable to do that.");
+          msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "You are unable to do that.");
           return true;
         }
         commandStore((Player)sender);
@@ -1141,7 +1143,7 @@ public class Stables
         reloadConfig();
         reloadlocalConfig();
         
-        msg(sender, "Stables configuration reloaded.");
+        msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "Stables configuration reloaded.");
         return true;
       }
       if ((args.length >= 1) && (args[0].equalsIgnoreCase("save")))
@@ -1151,7 +1153,7 @@ public class Stables
           local(sender, "NO_PERM");
           return true;
         }
-        msg(sender, "Saved.");
+        msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "Saved.");
         return true;
       }
       if ((args.length >= 1) && (args[0].equalsIgnoreCase("convert")))
@@ -1263,7 +1265,7 @@ public class Stables
   {
     ArrayList<String> names = new ArrayList();
     
-    msg(s, "Converting horse stables ...");
+    msg(s, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE +  "Converting horse stables ...");
     this.rs = queryDB("SELECT owner, owneruuid FROM " + getConfig().getString("MySQL.prefix") + "stables");
     try
     {
@@ -1281,7 +1283,7 @@ public class Stables
     {
       error("SQL Error - UUIDConversion");
     }
-    msg(s, "Converting " + names.size() + " entries");
+    msg(s, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE +  "Converting " + names.size() + " entries");
     while (names.size() > 0)
     {
       String query = "UPDATE " + getConfig().getString("MySQL.prefix") + "stables SET owneruuid= '" + getServer().getOfflinePlayer((String)names.get(0)).getUniqueId() + "' WHERE owner='" + (String)names.get(0) + "';";
@@ -1297,7 +1299,7 @@ public class Stables
     ArrayList<String> names = new ArrayList();
     
 
-    msg(s, "Converting horse owners ...");
+    msg(s, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE +  "Converting horse owners ...");
     this.rs = queryDB("SELECT owner, owneruuid FROM " + getConfig().getString("MySQL.prefix") + "horses");
     try
     {
@@ -1315,7 +1317,7 @@ public class Stables
     {
       error("SQL Error - UUIDConversion");
     }
-    msg(s, "Converting " + names.size() + " entries");
+    msg(s, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE +  "Converting " + names.size() + " entries");
     while (names.size() > 0)
     {
       String query = "UPDATE " + getConfig().getString("MySQL.prefix") + "horses SET owneruuid= '" + getServer().getOfflinePlayer((String)names.get(0)).getUniqueId() + "' WHERE owner='" + (String)names.get(0) + "';";
@@ -1518,19 +1520,21 @@ public class Stables
     boolean found = false;
     if (args.length == 1)
     {
-      msg(sender, "Alter what config option?");
-      msg(sender, "Debug");
-      msg(sender, "Block");
-      msg(sender, "Lure");
-      msg(sender, "Virtual");
-      msg(sender, "Recipe");
-      msg(sender, "Name");
+      msg(sender, "===============" + ChatColor.GREEN + " [" + ChatColor.DARK_GREEN + "Stables Config Settings" + ChatColor.GREEN + "] " + ChatColor.WHITE + "===============");
+      msg(sender, ChatColor.DARK_GREEN + "To view current values use " + ChatColor.WHITE + "/stables report" );
+      msg(sender, ChatColor.GREEN + "The following options are set as a toggle:");
+      msg(sender, "/stables config Debug");
+      msg(sender, "/stables config Block");
+      msg(sender, "/stables config Lure");
+      msg(sender, "/stables config Virtual");
+      msg(sender, "/stables config Recipe");
+      msg(sender, "/stables config Name");
       return;
     }
     if ((args.length >= 2) && (args[1].equalsIgnoreCase("debug")))
     {
       getConfig().set("general.Debug", Boolean.valueOf(!getConfig().getBoolean("general.Debug")));
-      msg(sender, "Toggled: Debug message is now " + getConfig().getBoolean("general.Debug"));
+      msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "Toggled: Debug message is now " + getConfig().getBoolean("general.Debug"));
       saveConfig();
       reloadConfig();
       found = true;
@@ -1538,15 +1542,15 @@ public class Stables
     }
     if ((args.length >= 2) && (args[1].equalsIgnoreCase("Name")))
     {
-      msg(sender, "This is only editable directly in the config for now."); return;
+      msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "This is only editable directly in the config for now."); return;
     }
     String set;
     if ((args.length >= 2) && (args[1].equalsIgnoreCase("Lure")))
     {
       if (args.length != 4)
       {
-        syntax(sender, "/stables config lure (option) (setting)");
-        msg(sender, "Valid lure options are: allow, chance, item, delay, disabled, min, max");
+        syntax(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "/stables config lure (option) (setting)");
+        msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "Valid lure options are: allow, chance, item, delay, disabled, min, max");
         return;
       }
       String option = args[2].toLowerCase();
@@ -1556,41 +1560,41 @@ public class Stables
       {
       case -1361636556: 
         if (str1.equals("chance")) {
-          break label405;
+        //  break label405;
         }
         break;
       case 107876: 
         if (str1.equals("max")) {
-          break label405;
+         // break label405;
         }
         break;
       case 108114: 
         if (str1.equals("min")) {
-          break label405;
+         // break label405;
         }
         break;
       case 3242771: 
         if (str1.equals("item")) {
-          break label405;
+         // break label405;
         }
         break;
       case 92906313: 
         if (str1.equals("allow")) {
-          break label405;
+         // break label405;
         }
         break;
       case 95467907: 
       case 270940796: 
-        if ((str1.equals("delay")) || ((goto 403) && (str1.equals("disabled")))) {
-          break label405;
+        if ((str1.equals("delay"))){ // || ((goto 403) && (str1.equals("disabled")))) {
+         // break label405;
         }
       }
       found = false;
       label405:
       if (!found)
       {
-        syntax(sender, "/stables config lure (option) (setting)");
-        msg(sender, "Valid lure options are: allow, chance, item, delay, disabled, min, max");
+        syntax(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE +  "/stables config lure (option) (setting)");
+        msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "Valid lure options are: allow, chance, item, delay, disabled, min, max");
         return;
       }
       saveConfig(); return;
@@ -1600,8 +1604,8 @@ public class Stables
     {
       if (args.length != 4)
       {
-        syntax(sender, "/stables config virtual (option) (setting)");
-        msg(sender, "Valid Virtual Stable options are: cost, command, timeout, disabled");
+        syntax(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "/stables config virtual (option) (setting)");
+        msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "Valid Virtual Stable options are: cost, command, timeout, disabled");
         return;
       }
       option = args[2];
@@ -1611,8 +1615,8 @@ public class Stables
     {
       if (args.length != 3)
       {
-        syntax(sender, "/stables config recipe (option)");
-        msg(sender, "Valid recipe options are: saddle, nametag, ironarmor, goldarmor, diamondarmor, usePerms");
+        syntax(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "/stables config recipe (option)");
+        msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "Valid recipe options are: saddle, nametag, ironarmor, goldarmor, diamondarmor, usePerms");
         return;
       }
       option = args[2];
@@ -1621,8 +1625,8 @@ public class Stables
     {
       if (args.length != 3)
       {
-        syntax(sender, "/stables config block (type)");
-        msg(sender, "Valid block types are: all, pvp, environment, owner, mob");
+        syntax(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "/stables config block (type)");
+        msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "Valid block types are: all, pvp, environment, owner, mob");
         return;
       }
       String type = args[2];
@@ -1648,8 +1652,8 @@ public class Stables
       }
       else
       {
-        syntax(sender, "/stables config block (type)");
-        msg(sender, "Valid block types are: all, pvp, environment, owner, mob");
+        syntax(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "/stables config block (type)");
+        msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "Valid block types are: all, pvp, environment, owner, mob");
         return;
       }
       msg(sender, "Damage config is now:");
@@ -1672,7 +1676,7 @@ public class Stables
     }
     if (!found)
     {
-      msg(sender, "That is an invalid option.");
+      msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "That is an invalid option.");
       return;
     }
     saveConfig();
@@ -2445,97 +2449,96 @@ public class Stables
   
   private void setupLanguage()
   {
-    setLang("SYNTAX", "Syntax is: ");
-    setLang("ADD_HIT", "Punch the horse you want to add the rider to.");
-    setLang("ADD_NOARG", "Who do you want to add as a rider?");
-    setLang("CONFIG_ERROR", "Could not save config to");
-    setLang("CONFIG_RELOAD", "Stables configuration reloaded.");
-    setLang("CONFIG_SAVE", "Horses saved.");
-    setLang("DEL_HIT", "Punch the horse you want to delete the rider from.");
-    setLang("DEL_NOARG", "Who do you want to delete as a rider?");
-    setLang("HIT_FREE", "You set this beast free.");
-    setLang("HIT_MAX", "You already own too many horses! You cannot tame this beast.");
-    setLang("HIT_NEW", "Enjoy your new steed!");
-    setLang("HIT_REMOVE", "Punch the horse you want to remove the owner from.");
-    setLang("LIST_NOARG", "Who do you wish to list the horses of?");
-    setLang("LIST_OWNED", "owns the following horses:");
-    setLang("NO_CONSOLE", "This command cannot be run from the console.");
-    setLang("NO_PERM", "You do not have permission for that.");
-    setLang("NOT_OWNER", "That is not even your horse!");
-    setLang("PERM_NOCLEAR", "That is not your horse! You cannot set it free!");
-    setLang("PERM_NORIDE", "You have not been given permission to ride that horse!");
-    setLang("PERM_NOTHEFT", "That is not your horse! That belongs to %1");
-    setLang("RECIPE_ADDED", "Recipe added:");
-    setLang("REMOVE_NOARG", "Who do you wish to remove the horses of?");
-    setLang("REMOVE_NOHORSE", "That player owns no horses.");
-    setLang("RIDER_ADD", "Rider added!");
-    setLang("RIDER_ADD_FAILED", "The UUID of that player could not be found. Please try again.");
-    setLang("RIDER_DEL", "Rider removed.");
-    setLang("RO_HIT", "Punch the horse you want to remove the owner of.");
-    setLang("UNKNOWN_OWNER", "That owner is unknown.");
+    setLang("SYNTAX", "&a[&2Stables&a]&f Syntax is: ");
+    setLang("ADD_HIT", "&a[&2Stables&a]&f Punch the horse you want to add the rider to.");
+    setLang("ADD_NOARG", "&a[&2Stables&a]&f Who do you want to add as a rider?");
+    setLang("CONFIG_ERROR", "'&a[&2Stables&a]&f Could not save config to'");
+    setLang("CONFIG_RELOAD", "&a[&2Stables&a]&f Stables configuration reloaded.");
+    setLang("CONFIG_SAVE", "&a[&2Stables&a]&f Horses saved.");
+    setLang("DEL_HIT", "&a[&2Stables&a]&f Punch the horse you want to delete the rider from.");
+    setLang("DEL_NOARG", "'&a[&2Stables&a]&f Who do you want to delete as a rider?'");
+    setLang("HIT_FREE", "'&a[&2Stables&a]&f You set this beast free.'");
+    setLang("HIT_MAX", "&a[&2Stables&a]&f You already own too many horses! You cannot tame this beast.");
+    setLang("HIT_NEW", "&a[&2Stables&a]&f Enjoy your new horse!");
+    setLang("HIT_REMOVE", "&a[&2Stables&a]&f Punch the horse you want to remove the owner from.");
+    setLang("LIST_NOARG", "&a[&2Stables&a]&f Who do you wish to list the horses of?");
+    setLang("NO_CONSOLE", "&a[&2Stables&a]&f This command cannot be run from the console.");
+    setLang("NO_PERM", "&a[&2Stables&a]&c You do not have permission for that.");
+    setLang("NOT_OWNER", "&a[&2Stables&a]&f That is not even your horse!");
+    setLang("PERM_NOCLEAR", "&a[&2Stables&a]&f That is not your horse! You cannot set it free!");
+    setLang("PERM_NORIDE", "&a[&2Stables&a]&f You have not been given permission to ride that horse!");
+    setLang("PERM_NOTHEFT", "&a[&2Stables&a]&f That is not your horse! That belongs to %1");
+    setLang("RECIPE_ADDED", "&a[&2Stables&a]&f Recipe added:");
+    setLang("REMOVE_NOARG", "&a[&2Stables&a]&f Who do you wish to remove the horses of?");
+    setLang("REMOVE_NOHORSE", "&a[&2Stables&a]&f That player owns no horses.");
+    setLang("RIDER_ADD", "&a[&2Stables&a]&f Rider added!");
+    setLang("RIDER_ADD_FAILED", "&a[&2Stables&a]&f The UUID of that player could not be found. Please try again.");
+    setLang("RIDER_DEL", "&a[&2Stables&a]&f Rider removed.");
+    setLang("RO_HIT", "&a[&2Stables&a]&f Punch the horse you want to remove the owner of.");
+    setLang("UNKNOWN_OWNER", "&a[&2Stables&a]&f That owner is unknown.");
     
-    setLang("SUMMON_HORSE", "You summon your steed to your location.");
-    setLang("CHECK_HIT", "Punch the horse you want to check the info of.");
-    setLang("LIST_NOHORSE", "That player owns no horses.");
-    setLang("HORSE_UNKNOWN", "A horse by that name was not located.");
-    setLang("HORSE_NOT_FOUND", "Your steed could not be located.");
-    setLang("TP_FOUND", "You teleport to your steed's last known location.");
-    setLang("COMMAND_DISABLED", "A mystical force prevents you from doing this.");
-    setLang("HORSE_WRONG_WORLD", "Your steed was not found in this world.");
-    setLang("COMPASS_LOCKED", "Your compass has locked in to your steed's last location.");
-    setLang("DISABLED_WORLD", "You are unable to do that here!");
-    setLang("TOO_POOR", "You are unable to afford the stable master's fee of $%1");
-    setLang("FEE_COLLECT", "The stable master collects his fee of $%1");
-    setLang("MASTER_STORE", "The stable master leads your horse into a stall.");
-    setLang("TOO_MANY_HORSES", "You already own too many horses! You cannot tame this beast.");
-    setLang("HIT_STORE", "Hit the horse you wish to store.");
-    setLang("LURE_FAIL", "You failed to lure any horses out.");
-    setLang("EXIT_NOT_TAME", "This horse has not yet been named, and is not claimed by you. Use a name tag to claim it for your own!");
-    setLang("PUNISH_BREED", "Your ability to breed horses has been revoked.");
-    setLang("PUNISH_NAME", "Your ability to name horses has been revoked.");
-    setLang("NOT_RIDER", "%1 has not given you permission to ride that horse!");
-    setLang("SET_FREE", "You set this beast free.");
-    setLang("NEW_STEED", "Enjoy your new steed!");
-    setLang("REMOVE_CHEST", "You have removed the chest from your steed.");
-    setLang("NO_CHESTS", "The stable master cannot be held responsible for a horse's inventory, and refuses to stable your steed at this time. You may use /stables removechest instead.");
-    setLang("ALREADY_LURE", "Shh! You're already trying to lure out a horse!");
-    setLang("START_LURE", "You begin trying to lure out a horse ...");
-    setLang("RECIPE_PERM", "You do not have the knowledge to craft that item!");
-    setLang("HORSE_ABANDON", "You abandon your steed.");
-    setLang("HORSE_ABANDON_NOT_FOUND", "You abandon your steed. Note: The physical horse was not located. As such, it may remain 'named', but is no longer claimed by you.");
-    setLang("CMD_NAME", "Change the name of (player)'s horse to (new name)");
-    setLang("CMD_ADD", "Add (rider) to your horse");
-    setLang("CMD_DEL", "Remove (rider) from your horse");
-    setLang("CMD_LIST", "List all of your own horses");
-    setLang("CMD_ABANDON", "Free (horse) from your ownership");
-    setLang("CMD_VIEW", "Show all horses in your virtual stables");
-    setLang("CMD_STORE", "Store a horse in your virtual stables");
-    setLang("CMD_RECOVER", "Recover horse # from your virtual stables. Requires #, NOT NAME");
-    setLang("CMD_FIND", "Point a compass to your horse's last location");
-    setLang("CMD_SUMMON", "Summon your horse to your location");
-    setLang("CMD_TP", "Teleport to your horse's last location");
-    setLang("CMD_CHECK", "View a horse's information & owner");
-    setLang("CMD_RO", "Remove a horse's owner");
-    setLang("CMD_LISTALL", "View all of (player)'s horses");
-    setLang("CMD_CLEAR", "Remove ALL horses owned by (player)");
-    setLang("CMD_RELOAD", "Reload the config file - will not change database options");
-    setLang("CMD_SAVE", "Force a save of the horse database");
-    setLang("CMD_CONFIG", "Alter config options");
-    setLang("CMD_CONVERT", "Convert Flatfile YAML config to SQL");
-    setLang("CMD_RENAME", "Rename a horse from a random list of names");
-    setLang("ADD_ERROR", "That is not a horse! You cannot claim it!");
-    setLang("ADD_AUTO", "You have claimed this steed as your own!");
-    setLang("NEW_NAME", "You have given your steed a new name!");
-    setLang("RENAME_NOT_FOUND", "Your horse couldn't be found near by - are you too far away?");
-    setLang("RECOVER_WG", "This area is protected! The stablemaster will not deliver here!");
+    setLang("SUMMON_HORSE", "&a[&2Stables&a]&f You summon your steed to your location.");
+    setLang("CHECK_HIT", "&a[&2Stables&a]&f Punch the horse you want to check the info of.");
+    setLang("LIST_NOHORSE", "&a[&2Stables&a]&f That player owns no horses.");
+    setLang("HORSE_UNKNOWN", "&a[&2Stables&a]&f A horse by that name was not located.");
+    setLang("HORSE_NOT_FOUND", "&a[&2Stables&a]&f Your steed could not be located.");
+    setLang("TP_FOUND", "&a[&2Stables&a]&f You teleport to your steed's last known location.");
+    setLang("COMMAND_DISABLED", "&a[&2Stables&a]&f A mystical force prevents you from doing this.");
+    setLang("HORSE_WRONG_WORLD", "&a[&2Stables&a]&f Your steed was not found in this world.");
+    setLang("COMPASS_LOCKED", "&a[&2Stables&a]&f Your compass has locked in to your steed's last location.");
+    setLang("DISABLED_WORLD", "&a[&2Stables&a]&f You are unable to do that here!");
+    setLang("TOO_POOR", "&a[&2Stables&a]&f You are unable to afford the stable master's fee of $%1");
+    setLang("FEE_COLLECT", "&a[&2Stables&a]&f The stable master collects his fee of $%1");
+    setLang("MASTER_STORE", "&a[&2Stables&a]&f The stable master leads your horse into a stall.");
+    setLang("TOO_MANY_HORSES", "&a[&2Stables&a]&f You already own too many horses! You cannot tame this beast.");
+    setLang("HIT_STORE", "&a[&2Stables&a]&f Hit the horse you wish to store.");
+    setLang("LURE_FAIL", "&a[&2Stables&a]&f You failed to lure any horses out.");
+    setLang("EXIT_NOT_TAME", "&a[&2Stables&a]&f This horse has not yet been named, and is not claimed by you. Use a name tag to claim it.");
+    setLang("PUNISH_BREED", "&a[&2Stables&a]&f Your ability to breed horses has been revoked.");
+    setLang("PUNISH_NAME", "&a[&2Stables&a]&f Your ability to name horses has been revoked.");
+    setLang("NOT_RIDER", "&a[&2Stables&a]&f %1 has not given you permission to ride that horse!");
+    setLang("SET_FREE", "&a[&2Stables&a]&f You set this beast free.");
+    setLang("NEW_STEED", "&a[&2Stables&a]&f Enjoy your new steed!");
+    setLang("REMOVE_CHEST", "&a[&2Stables&a]&f You have removed the chest from your steed.");
+    setLang("NO_CHESTS", "&a[&2Stables&a]&f The stable master cannot be held responsible for a horse's inventory, and refuses to stable your horse at this time. You may use /stables removechest instead.");
+    setLang("ALREADY_LURE", "&a[&2Stables&a]&f Shh! You're already trying to lure out a horse!");
+    setLang("START_LURE", "&a[&2Stables&a]&f You begin trying to lure out a horse ...");
+    setLang("RECIPE_PERM", "&a[&2Stables&a]&f You do not have the knowledge to craft that item!");
+    setLang("HORSE_ABANDON", "&a[&2Stables&a]&f You abandon your steed.");
+    setLang("HORSE_ABANDON_NOT_FOUND", "&a[&2Stables&a]&f You abandon your steed. Note: The physical horse was not located. As such, it may remain 'named', but is no longer claimed by you.");
+    setLang("CMD_NAME", "&a[&2Stables&a]&f Change the name of (player)'s horse to (new name)");
+    setLang("CMD_ADD", "&a[&2Stables&a]&f Add (rider) to your horse");
+    setLang("CMD_DEL", "&a[&2Stables&a]&f Remove (rider) from your horse");
+    setLang("CMD_LIST", "&a[&2Stables&a]&f List all of your own horses");
+    setLang("CMD_ABANDON", "&a[&2Stables&a]&f Free (horse) from your ownership");
+    setLang("CMD_VIEW", "&a[&2Stables&a]&f Show all horses in your virtual stables");
+    setLang("CMD_STORE", "&a[&2Stables&a]&f Store a horse in your virtual stables");
+    setLang("CMD_RECOVER", "&a[&2Stables&a]&f Recover horse # from your virtual stables. Requires #, NOT NAME");
+    setLang("CMD_FIND", "&a[&2Stables&a]&f Point a compass to your horse's last location");
+    setLang("CMD_SUMMON", "&a[&2Stables&a]&f Summon your horse to your location");
+    setLang("CMD_TP", "&a[&2Stables&a]&f Teleport to your horse's last location");
+    setLang("CMD_CHECK", "&a[&2Stables&a]&f View a horse's information & owner");
+    setLang("CMD_RO", "&a[&2Stables&a]&f Remove a horse's owner");
+    setLang("CMD_LISTALL", "&a[&2Stables&a]&f View all of (player)'s horses");
+    setLang("CMD_CLEAR", "&a[&2Stables&a]&f Remove ALL horses owned by (player)");
+    setLang("CMD_RELOAD", "&a[&2Stables&a]&f Reload the config file - will not change database options");
+    setLang("CMD_SAVE", "&a[&2Stables&a]&f Force a save of the horse database");
+    setLang("CMD_CONFIG", "&a[&2Stables&a]&f Alter config options");
+    setLang("CMD_CONVERT", "&a[&2Stables&a]&f Convert Flatfile YAML config to SQL");
+    setLang("CMD_RENAME", "&a[&2Stables&a]&f Rename a horse from a random list of names");
+    setLang("ADD_ERROR", "&a[&2Stables&a]&f That is not a horse! You cannot claim it!");
+    setLang("ADD_AUTO", "&a[&2Stables&a]&f You have claimed this steed as your own!");
+    setLang("NEW_NAME", "&a[&2Stables&a]&f You have given your steed a new name!");
+    setLang("RENAME_NOT_FOUND", "&a[&2Stables&a]&f Your horse couldn't be found near by - are you too far away?");
+    setLang("RECOVER_WG", "'&a[&2Stables&a]&f This area is protected! The stablemaster will not deliver here!'");
     
-    setLang("STABLES_RETURNOK", "The stable master waders off to the stalls, then returns with %1");
-    setLang("STABLES_LISTING", "You have the following horses in your stables:");
-    setLang("STABLES_RECOVERWHO", "Which horse did you want to recover?");
-    setLang("STABLES_RECOVERWHO2", "Type /stables recover (name)");
-    setLang("STABLES_TIMEOUT", "Stable storage timeout.");
-    setLang("STABLES_RECOVERSIGN1", "Use /recover");
-    setLang("STABLES_RECOVERSIGN2", "to retreive!");
+    setLang("STABLES_RETURNOK", "&a[&2Stables&a]&f The stable master waders off to the stalls, then returns with %1");
+    setLang("STABLES_LISTING", "&a[&2Stables&a]&f You have the following horses in your stables:");
+    setLang("STABLES_RECOVERWHO", "&a[&2Stables&a]&f Which horse did you want to recover?");
+    setLang("STABLES_RECOVERWHO2", "&a[&2Stables&a]&f Type /stables recover (name)");
+    setLang("STABLES_TIMEOUT", "&a[&2Stables&a]&f Stable storage timeout.");
+    setLang("STABLES_RECOVERSIGN1", "&a[&2Stables&a]&f Use /recover");
+    setLang("STABLES_RECOVERSIGN2", "&a[&2Stables&a]&f to retreive!");
     
 
     savelocalConfig();

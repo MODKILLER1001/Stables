@@ -1,7 +1,7 @@
 name: Stables
 main: me.raum.stables.Stables
-version: 1.9.2
-author: Raum
+version: 1.9.3
+author: Raum and externo6
 description: Stables-The horse protection plugin with virtual stables and much more!
 
 permissions:

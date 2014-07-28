@@ -254,7 +254,21 @@ public class EventListener
       }
     }
   }
-  
+	@EventHandler
+	public void onDamage(EntityDamageEvent e)
+	{
+		if(e.getEntityType().equals(EntityType.HORSE))
+		{
+			Horse h = (Horse) e.getEntity();
+			if(h.getPassenger() != null)
+			{
+					if(h.isTamed())
+						e.setCancelled(false);
+				}
+				
+				return;
+		}
+			}
   @EventHandler
   public void onEntityDamage(EntityDamageEvent event)
   {

@@ -193,6 +193,7 @@ public class Stables
     
     setConfig("general.Debug", Boolean.valueOf(false));
     setConfig("general.BlockAll", Boolean.valueOf(false));
+    setConfig("general.AllowPVPMountedDamage", Boolean.valueOf(true));
     setConfig("general.PVPDamage", Boolean.valueOf(true));
     setConfig("general.EnviromentDamage", Boolean.valueOf(true));
     setConfig("general.OwnerDamage", Boolean.valueOf(false));

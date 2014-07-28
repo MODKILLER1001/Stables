@@ -62,7 +62,6 @@ public class EventListener
       Bukkit.getServer().getLogger().info("Stables DEBUG: " + msg);
     }
   }
-  
   @EventHandler
   public void onVehicleExit(VehicleExitEvent event)
   {
@@ -254,12 +253,15 @@ public class EventListener
       }
     }
   }
+  //general.PVPMountedDamage
 	@EventHandler
 	public void onDamage(EntityDamageEvent e)
 	{
 		if(e.getEntityType().equals(EntityType.HORSE))
 		{
 			Horse h = (Horse) e.getEntity();
+			if (this.plugin.getConfig().getBoolean("general.AllowPVPMountedDamage"))
+					{
 			if(h.getPassenger() != null)
 			{
 					if(h.isTamed())
@@ -267,8 +269,19 @@ public class EventListener
 				}
 				
 				return;
-		}
+	}
+			}else
+			{
+				Horse h = (Horse) e.getEntity();
+				if(h.getPassenger() != null)
+				{
+						if(h.isTamed())
+							e.setCancelled(true);
+					}
+					
+					return;
 			}
+		}
   @EventHandler
   public void onEntityDamage(EntityDamageEvent event)
   {

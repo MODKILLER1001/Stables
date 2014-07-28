@@ -255,33 +255,36 @@ public class EventListener
   }
   //general.PVPMountedDamage
 	@EventHandler
-	public void onDamage(EntityDamageEvent e)
+	public void onDamage(EntityDamageEvent event)
 	{
-		if(e.getEntityType().equals(EntityType.HORSE))
+		if(event.getEntityType().equals(EntityType.HORSE))
 		{
-			Horse h = (Horse) e.getEntity();
+			Horse horse = (Horse) event.getEntity();
 			if (this.plugin.getConfig().getBoolean("general.AllowPVPMountedDamage"))
 					{
-			if(h.getPassenger() != null)
+			if(horse.getPassenger() != null)
 			{
-					if(h.isTamed())
-						e.setCancelled(false);
+					if(horse.isTamed())
+						event.setCancelled(false);
 				}
 				
 				return;
 	}
 			}else
 			{
-				Horse h = (Horse) e.getEntity();
-				if(h.getPassenger() != null)
+				if(event.getEntityType().equals(EntityType.HORSE))
 				{
-						if(h.isTamed())
-							e.setCancelled(true);
+				Horse horse = (Horse) event.getEntity();
+				if(horse.getPassenger() != null)
+				{
+						if(horse.isTamed())
+							event.setCancelled(true);
 					}
 					
 					return;
 			}
 		}
+	}
   @EventHandler
   public void onEntityDamage(EntityDamageEvent event)
   {

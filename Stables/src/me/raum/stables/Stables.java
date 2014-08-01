@@ -2355,11 +2355,11 @@ public class Stables
     {
       LivingEntity l = (LivingEntity)e;
       l.setCustomName(horseName);
-      local(p, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("ADD_AUTO", null));
+      msg(p, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("ADD_AUTO", null));
     }
     else
     {
-      local(p, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("NEW_STEED", null));
+      msg(p, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("NEW_STEED", null));
     }
     if (getConfig().getBoolean("horses.AutoSaddle"))
     {

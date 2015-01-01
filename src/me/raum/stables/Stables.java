@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,61 +36,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Bat;
-import org.bukkit.entity.Blaze;
-import org.bukkit.entity.Boat;
-import org.bukkit.entity.CaveSpider;
-import org.bukkit.entity.Chicken;
-import org.bukkit.entity.Cow;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.Egg;
-import org.bukkit.entity.EnderCrystal;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.EnderPearl;
-import org.bukkit.entity.EnderSignal;
-import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.FallingBlock;
-import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.Ghast;
-import org.bukkit.entity.Giant;
-import org.bukkit.entity.Golem;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.IronGolem;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.MagmaCube;
-import org.bukkit.entity.Minecart;
-import org.bukkit.entity.Monster;
-import org.bukkit.entity.MushroomCow;
-import org.bukkit.entity.Ocelot;
-import org.bukkit.entity.Painting;
-import org.bukkit.entity.Pig;
-import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Sheep;
-import org.bukkit.entity.Silverfish;
-import org.bukkit.entity.Skeleton;
-import org.bukkit.entity.Slime;
-import org.bukkit.entity.SmallFireball;
-import org.bukkit.entity.Snowball;
-import org.bukkit.entity.Snowman;
-import org.bukkit.entity.Spider;
-import org.bukkit.entity.Squid;
-import org.bukkit.entity.TNTPrimed;
-import org.bukkit.entity.ThrownExpBottle;
-import org.bukkit.entity.Villager;
-import org.bukkit.entity.Weather;
-import org.bukkit.entity.Witch;
-import org.bukkit.entity.Wither;
-import org.bukkit.entity.WitherSkull;
-import org.bukkit.entity.Wolf;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.HorseInventory;
 import org.bukkit.inventory.ItemStack;
@@ -122,6 +73,7 @@ public class Stables
   public static Stables plugin;
   ResultSet rs;
   private WorldGuardPlugin worldguard;
+  static String dbprefix;
   
   public void convertConfig()
   {
@@ -132,15 +84,15 @@ public class Stables
     }
   }
   
-  public void msg(CommandSender s, String msg, String replace)
+  public void msg(CommandSender s, Object msg, String replace)
   {
     msg = msg.toString().replaceAll("%1", replace);
-    s.sendMessage(msg.toString().replaceAll("&([0-9A-Fa-f])", "�$1"));
+    s.sendMessage(msg.toString().replaceAll("&([0-9A-Fa-f])", "ยง$1"));
   }
   
-  public void msg(CommandSender s, String msg)
+  public void msg(CommandSender s, Object msg)
   {
-    s.sendMessage(msg.toString().replaceAll("&([0-9A-Fa-f])", "�$1"));
+    s.sendMessage(msg.toString().replaceAll("&([0-9A-Fa-f])", "ยง$1"));
   }
   
   public void onEnable()
@@ -152,7 +104,7 @@ public class Stables
     this.randomNameConfig = new YamlConfiguration();
     
     LoadConfiguration();
-    
+
     SetupRecipes();
     if (!setup) {
       OpenDatabase();
@@ -193,7 +145,7 @@ public class Stables
     
     setConfig("general.Debug", Boolean.valueOf(false));
     setConfig("general.BlockAll", Boolean.valueOf(false));
-    setConfig("general.AllowPVPMountedDamage", Boolean.valueOf(true));
+
     setConfig("general.PVPDamage", Boolean.valueOf(true));
     setConfig("general.EnviromentDamage", Boolean.valueOf(true));
     setConfig("general.OwnerDamage", Boolean.valueOf(false));
@@ -219,6 +171,7 @@ public class Stables
     setConfig("horses.allowFind", Boolean.valueOf(false));
     setConfig("horses.allowTP", Boolean.valueOf(false));
     setConfig("horses.allowSummon", Boolean.valueOf(false));
+    setConfig("horses.allowSummonThroughWorlds", Boolean.valueOf(false));
     
     setConfig("horses.AutoOwn", Boolean.valueOf(false));
     setConfig("horses.AutoSaddle", Boolean.valueOf(false));
@@ -254,12 +207,37 @@ public class Stables
     setConfig("stable.enabled", "world");
     
     setConfig("recipe.usePerms", Boolean.valueOf(false));
-    setConfig("recipe.hardMode", Boolean.valueOf(false));
+    
+
     setConfig("recipe.saddle", Boolean.valueOf(true));
     setConfig("recipe.nametag", Boolean.valueOf(true));
     setConfig("recipe.armor.iron", Boolean.valueOf(true));
     setConfig("recipe.armor.gold", Boolean.valueOf(true));
     setConfig("recipe.armor.diamond", Boolean.valueOf(true));
+    
+    setConfig("recipe.recipes.SADDLE.recipe", "LLLLILI I");
+    setConfig("recipe.recipes.NAME_TAG.recipe", "  S P P  ");
+    setConfig("recipe.recipes.IRON_BARDING.recipe", "  IIWIIII");
+    setConfig("recipe.recipes.GOLD_BARDING.recipe", "  GGWGGGG");
+    setConfig("recipe.recipes.DIAMOND_BARDING.recipe", "  DDWDDDD");
+    
+    setConfig("recipe.materials.L", "LEATHER");
+    setConfig("recipe.materials.I", "IRON_INGOT");
+    setConfig("recipe.materials.G", "GOLD_INGOT");
+    setConfig("recipe.materials.D", "DIAMOND");
+    setConfig("recipe.materials.P", "PAPER");
+    setConfig("recipe.materials.S", "STRING");
+    setConfig("recipe.materials.W", "WOOL");
+    
+    setConfig("items.deconstruct.allow", Boolean.valueOf(false));
+    setConfig("items.deconstruct.item", "GOLD_BLOCK");
+    setConfig("items.deconstruct.fullRepairRequired", Boolean.valueOf(true));
+    setConfig("items.deconstruct.randomReward", Boolean.valueOf(true));
+    setConfig("items.deconstruct.failPercent", Integer.valueOf(20));
+    
+    setConfig("configVersion", Integer.valueOf(0));
+    
+    dbprefix = getConfig().getString("MySQL.prefix");
     
     addRandomNames();
     saveConfig();
@@ -305,84 +283,142 @@ public class Stables
       String msg = getlocalConfig().getString(phrase);
       if (var != null) {
         msg = msg.replaceAll("%1", var.toString());
-        
+
       }
       return msg;
     }
     return "Localization Error: " + phrase + " missing.";
   }
   
+  public void loadRecipe(String recipe)
+
+  {
+    try
+
+    {
+      HashMap<Character, Material> recipeMats = new HashMap();
+
+
+
+      
+      debug("Attempting recipe " + recipe);
+
+
+
+
+
+
+
+
+
+
+      
+
+
+      ShapedRecipe r = new ShapedRecipe(new ItemStack(Material.getMaterial(recipe)));
+      debug("Recipe successfully defined.");
+      String rec = getConfig().getString("recipe.recipes." + recipe + ".recipe");
+      debug("Recipe loaded: '" + rec + "'");
+      String line1 = rec.substring(0, 3);
+      String line2 = rec.substring(3, 6);
+      String line3 = rec.substring(6, 9);
+      debug(line1);
+      debug(line2);
+      debug(line3);
+
+
+
+
+
+
+
+
+      r.shape(new String[] {
+        line1, line2, line3 });
+
+      
+
+
+      debug("Shape set");
+      for (int i = 0; i < rec.length(); i++)
+      {
+        char c = rec.charAt(i);
+        if (!Character.isSpaceChar(c)) {
+          if (!recipeMats.containsKey(Character.valueOf(c)))
+          {
+
+            if (!getConfig().contains("recipe.materials." + c)) {
+              error("Material '" + c + "' not located! Define this material!");
+            }
+            Material mat = Material.getMaterial(getConfig().getString("recipe.materials." + c));
+            debug("Getting Material for " + c);
+            recipeMats.put(Character.valueOf(c), mat);
+            debug("Material set in list: " + c + "=" + mat.name());
+            r.setIngredient(c, (Material)recipeMats.get(Character.valueOf(c)));
+            debug("Ingrediant set.");
+          }
+        }
+
+
+
+      }
+      debug("Recipe complete - adding to server");
+      getServer().addRecipe(r);
+      getServer().getLogger().info(getLang("RECIPE_ADDED", null) + " " + r.getResult().getType());
+    }
+    catch (Exception e)
+
+    {
+      error("Error loading recipe " + recipe);
+      e.printStackTrace();
+      error("Error loading recipe " + recipe);
+    }
+  }
+  
   public void SetupRecipes()
   {
-    if (getConfig().getBoolean("recipe.saddle"))
-    {
-      ShapedRecipe r = new ShapedRecipe(new ItemStack(Material.SADDLE));
-      r.shape(new String[] {
-        "LLL", "LIL", "I I" });
-      
-      r.setIngredient('L', Material.LEATHER);
-      r.setIngredient('I', Material.IRON_INGOT);
-      getServer().addRecipe(r);
-      getServer().getLogger().info(getLang("RECIPE_ADDED", null) + " " + r.getResult().getType());
+    if (getConfig().getBoolean("recipe.saddle")) {
+      loadRecipe("SADDLE");
     }
-    if (getConfig().getBoolean("recipe.nametag"))
-    {
-      ShapedRecipe r = new ShapedRecipe(new ItemStack(Material.NAME_TAG));
-      r.shape(new String[] {
-        "  S", " P ", "P  " });
-      
-      r.setIngredient('S', Material.STRING);
-      r.setIngredient('P', Material.PAPER);
-      getServer().addRecipe(r);
-      getServer().getLogger().info(getLang("RECIPE_ADDED", null) + " " + r.getResult().getType());
-    }
-    if (getConfig().getBoolean("recipe.armor.iron"))
-    {
-      ShapedRecipe r = new ShapedRecipe(new ItemStack(Material.IRON_BARDING));
-      r.shape(new String[] {
-        "  I", "ILI", "III" });
-      
-      r.setIngredient('L', Material.WOOL, -1);
-      if (getConfig().getBoolean("recipe.hardMode")) {
-        r.setIngredient('I', Material.IRON_BLOCK);
-      } else {
-        r.setIngredient('I', Material.IRON_INGOT);
-      }
-      getServer().addRecipe(r);
-      getServer().getLogger().info(getLang("RECIPE_ADDED", null) + " " + r.getResult().getType());
-    }
-    if (getConfig().getBoolean("recipe.armor.gold"))
-    {
-      ShapedRecipe r = new ShapedRecipe(new ItemStack(Material.GOLD_BARDING));
-      r.shape(new String[] {
-        "  I", "ILI", "III" });
-      
-
-      r.setIngredient('L', Material.WOOL, -1);
-      if (getConfig().getBoolean("recipe.hardMode")) {
-        r.setIngredient('I', Material.GOLD_BLOCK);
-      } else {
-        r.setIngredient('I', Material.GOLD_INGOT);
-      }
-      getServer().addRecipe(r);
-      getServer().getLogger().info(getLang("RECIPE_ADDED", null) + " " + r.getResult().getType());
-    }
-    if (getConfig().getBoolean("recipe.armor.diamond"))
-    {
-      ShapedRecipe r = new ShapedRecipe(new ItemStack(Material.DIAMOND_BARDING));
-      r.shape(new String[] {
-        "  I", "ILI", "III" });
-      
 
 
-      r.setIngredient('L', Material.WOOL, -1);
-      if (getConfig().getBoolean("recipe.hardMode")) {
-        r.setIngredient('I', Material.DIAMOND_BLOCK);
-      } else {
-        r.setIngredient('I', Material.DIAMOND);
-      }
-      getServer().addRecipe(r);
-      getServer().getLogger().info(getLang("RECIPE_ADDED", null) + " " + r.getResult().getType());
+
+
+
+
+    if (getConfig().getBoolean("recipe.nametag")) {
+      loadRecipe("NAME_TAG");
+    }
+    if (getConfig().getBoolean("recipe.armor.iron")) {
+      loadRecipe("IRON_BARDING");
+    }
+    if (getConfig().getBoolean("recipe.armor.gold")) {
+      loadRecipe("GOLD_BARDING");
+
+
+
+
+
+
+    }
+    if (getConfig().getBoolean("recipe.armor.diamond")) {
+      loadRecipe("DIAMOND_BARDING");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
   }
   
@@ -599,6 +635,8 @@ public class Stables
     {
       if ((args.length == 0) || ((args.length >= 1) && (args[0].equalsIgnoreCase("help"))))
       {
+        msg(sender, "Stables, version " + plugin.getDescription().getVersion());
+//        msg(sender, "-----------------------------------");
         msg(sender,"===============" + ChatColor.GREEN + " [" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "===============" );
         msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "AddRider - " + ChatColor.RESET + getLang("CMD_ADD", null));
         msg(sender, ChatColor.GREEN.toString() + ChatColor.BOLD + "DelRider - " + ChatColor.RESET + getLang("CMD_DEL", null));
@@ -764,7 +802,8 @@ public class Stables
       if ((args.length >= 1) && (args[0].equalsIgnoreCase("list")))
       {
         String owner = sender.getName();
-        msg(sender, "======" + ChatColor.GREEN + " [" + ChatColor.DARK_GREEN + owner + " Owns the Following Horses" + ChatColor.GREEN + "] " + ChatColor.WHITE + "======");
+        msg(sender, owner + " " + getLang("LIST_OWNED", null));
+
         this.rs = queryDB("SELECT uid, tamed, named, x, y, z FROM " + getConfig().getString("MySQL.prefix") + "horses WHERE owner='" + owner + "'");
         try
         {
@@ -784,7 +823,7 @@ public class Stables
         if (args.length < 2)
         {
           msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE +  "/stables abandon (horsename)");
-          return true; 
+          return true;
         }
         if (!(sender instanceof Player))
         {
@@ -881,6 +920,13 @@ public class Stables
         for (int t = 0; t < entitylist.size(); t++) {
           if (((Entity)entitylist.get(t)).getUniqueId().toString().equals(uid))
           {
+            if ((!getConfig().getBoolean("horses.allowSummonThroughWorlds")) && 
+              (!((Entity)entitylist.get(t)).getWorld().equals(p.getWorld())) && 
+              (!p.hasPermission("stables.summon.world")))
+            {
+              local(sender, "SUMMON_HORSE_DIFFWORLD");
+              return true;
+            }
             ((Entity)entitylist.get(t)).teleport(p.getLocation());
             
             msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("SUMMON_HORSE", null));
@@ -977,7 +1023,8 @@ public class Stables
           return true;
         }
         String owner;
-        
+       // String owner;
+
         if (getServer().getPlayerExact(args[1]) == null)
         {
           OfflinePlayer player = getServer().getOfflinePlayer(args[1]);
@@ -992,6 +1039,7 @@ public class Stables
         {
           owner = getServer().getPlayerExact(args[1].toString()).getName();
         }
+        msg(sender, owner + " " + getLang("LIST_OWNED", null) + ":");
         msg(sender, "======" + ChatColor.GREEN + " [" + ChatColor.DARK_GREEN + owner + " Owns the Following Horses" + ChatColor.GREEN + "] " + ChatColor.WHITE + "======");
         this.rs = queryDB("SELECT uid, tamed, named, x, y, z FROM " + getConfig().getString("MySQL.prefix") + "horses WHERE owner='" + owner + "'");
         try
@@ -1100,7 +1148,7 @@ public class Stables
       {
         if (!(sender instanceof Player))
         {
-          msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("NO_CONSOLE", null));
+        local(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("NO_CONSOLE", null));
           return true;
         }
         viewStables((Player)sender);
@@ -1110,7 +1158,7 @@ public class Stables
       {
         if (!(sender instanceof Player))
         {
-          msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("NO_CONSOLE", null));
+          local(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("NO_CONSOLE", null));
           return true;
         }
         recoverStables((Player)sender, args, 1);
@@ -1120,7 +1168,7 @@ public class Stables
       {
         if (!(sender instanceof Player))
         {
-          msg(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("NO_CONSOLE", null));
+          local(sender, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("NO_CONSOLE", null));
           return true;
         }
         Player p = (Player)sender;
@@ -1367,13 +1415,13 @@ public class Stables
     {
       debug("Checking worldguard ....");
       RegionManager r = this.worldguard.getRegionManager(p.getWorld());
-      
+
       ApplicableRegionSet set = r.getApplicableRegions(p.getLocation());
       if (r.size() != 0) {
         if (!set.allows(DefaultFlag.MOB_SPAWNING))
         {
           debug("WG: No mob spawning here!");
-          local(p, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("RECOVER_WG", null));
+          msg(p, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("RECOVER_WG", null));
           return;
         }
       }
@@ -1381,7 +1429,7 @@ public class Stables
     if ((!p.getWorld().getAllowAnimals()) || (!p.getWorld().getAllowMonsters()))
     {
       debug("World Settings - No mobs");
-      local(p, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("RECOVER_WG", null));
+      msg(p, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("RECOVER_WG", null));
       return;
     }
     if ((!getConfig().getBoolean("stable.useCommand")) && (!atStable(p.getLocation(), Integer.valueOf(5))))
@@ -1402,6 +1450,7 @@ public class Stables
       this.rs = queryDB("SELECT name FROM " + getConfig().getString("MySQL.prefix") + "stable WHERE owner='" + p.getName() + "'");
       try
       {
+
         msg(p, getLang("STABLES_LISTING", null));
         while (this.rs.next())
         {
@@ -1415,7 +1464,7 @@ public class Stables
         }
         else
         {
-          p.sendMessage(ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + "None!");
+          p.sendMessage("Oops, looks like you havent stored any horses!");
         }
         return;
       }
@@ -1440,7 +1489,7 @@ public class Stables
       if (this.rs.next())
       {
         String name = this.rs.getString(11).replaceAll("`", "'");
-        msg(p, getLang("STABLES_RETURNOK", name));
+        msg(p, (ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("STABLES_RETURNOK", name)));
         HorseModifier hm = HorseModifier.spawn(p.getLocation());
         Horse h = (Horse)hm.getHorse();
         String chest = this.rs.getString(4);
@@ -1505,14 +1554,15 @@ public class Stables
     if ((entity instanceof Horse)) {
       return true;
     }
-    if (!(entity instanceof LivingEntity)) {
-      return false;
+    if (entity.getType() == EntityType.HORSE) {
+
+      return true;
     }
-    if (((entity instanceof Sheep)) || ((entity instanceof Cow)) || ((entity instanceof Minecart)) || ((entity instanceof Boat)) || ((entity instanceof MushroomCow)) || ((entity instanceof Pig)) || ((entity instanceof Wolf)) || ((entity instanceof Bat)) || ((entity instanceof Chicken)) || ((entity instanceof Blaze)) || ((entity instanceof CaveSpider)) || ((entity instanceof Creeper)) || ((entity instanceof EnderDragon)) || ((entity instanceof Enderman)) || ((entity instanceof Ghast)) || ((entity instanceof Giant)) || ((entity instanceof Golem)) || ((entity instanceof HumanEntity)) || ((entity instanceof IronGolem)) || ((entity instanceof MagmaCube)) || ((entity instanceof Monster)) || ((entity instanceof Ocelot)) || ((entity instanceof PigZombie)) || ((entity instanceof Player)) || ((entity instanceof Silverfish)) || ((entity instanceof Skeleton)) || ((entity instanceof Slime)) || ((entity instanceof Snowman)) || ((entity instanceof Spider)) || ((entity instanceof Squid)) || ((entity instanceof Villager)) || ((entity instanceof Witch)) || ((entity instanceof Wither)) || ((entity instanceof Zombie)) || ((entity instanceof Item)) || ((entity instanceof ExperienceOrb)) || ((entity instanceof Painting)) || ((entity instanceof Arrow)) || ((entity instanceof Snowball)) || ((entity instanceof Fireball)) || ((entity instanceof SmallFireball)) || ((entity instanceof EnderPearl)) || ((entity instanceof EnderSignal)) || ((entity instanceof ThrownExpBottle)) || ((entity instanceof ItemFrame)) || ((entity instanceof WitherSkull)) || ((entity instanceof TNTPrimed)) || ((entity instanceof FallingBlock)) || ((entity instanceof Firework)) || ((entity instanceof Boat)) || ((entity instanceof Minecart)) || ((entity instanceof EnderCrystal)) || ((entity instanceof Egg)) || ((entity instanceof Weather)) || ((entity instanceof Player))) {
-      return false;
-    }
-    debug("Entity: " + entity.getClass());
-    return true;
+
+    return false;
+
+
+
   }
   
   public void changeConfig(CommandSender sender, String[] args)
@@ -1560,33 +1610,33 @@ public class Stables
       {
       case -1361636556: 
         if (str1.equals("chance")) {
-        //  break label405;
+          break label405;
         }
         break;
       case 107876: 
         if (str1.equals("max")) {
-         // break label405;
+          break label405;
         }
         break;
       case 108114: 
         if (str1.equals("min")) {
-         // break label405;
+          break label405;
         }
         break;
       case 3242771: 
         if (str1.equals("item")) {
-         // break label405;
+          break label405;
         }
         break;
       case 92906313: 
         if (str1.equals("allow")) {
-         // break label405;
+          break label405;
         }
         break;
       case 95467907: 
       case 270940796: 
-        if ((str1.equals("delay"))){ // || ((goto 403) && (str1.equals("disabled")))) {
-         // break label405;
+        if ((str1.equals("delay")) || ((goto 403) && (str1.equals("disabled")))) {
+          break label405;
         }
       }
       found = false;
@@ -1777,7 +1827,7 @@ public class Stables
       getServer().getPlayer(owner).sendMessage(getLang("FEE_COLLECT", Double.valueOf(cost)));
       economy.withdrawPlayer(owner, cost);
     }
-    local(getServer().getPlayer(owner), ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("MASTER_STORE", null));
+    msg(getServer().getPlayer(owner), ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("MASTER_STORE", null));
     
 
     String owneruuid = "'" + HorseOwner(horse.getUniqueId().toString()) + "'";
@@ -1868,7 +1918,7 @@ public class Stables
     }
     if (notame)
     {
-      local(player, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("TOO_MANY_HORSES", null));
+      msg(player, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("TOO_MANY_HORSES", null));
       return false;
     }
     return true;
@@ -1992,10 +2042,32 @@ public class Stables
     return null;
   }
   
-  public String getUUID(String name)
+  String getUUID(String pname)
   {
-    if (getServer().getPlayer(name) != null) {
-      return getServer().getPlayer(name).getUniqueId().toString();
+    String uuid = null;
+    
+    String query = "SELECT * FROM " + getConfig().getString("MySQL.prefix") + "uuid WHERE who='" + pname.toLowerCase() + "';";
+    ResultSet rs = queryDB(query);
+    try
+    {
+      rs.next();
+      uuid = rs.getString("uuid");
+      rs.close();
+      return uuid;
+    }
+    catch (SQLException e)
+    {
+      debug("Couldn't find UUID in Database - checking servers");
+      uuid = null;
+     try
+    {
+
+        return UUIDFetcher.getUUIDOf(pname).toString();
+      }
+      catch (Exception event)
+      {
+        getLogger().warning("[Stables] Unable to fetch UUID for " + pname);
+      }
     }
     return null;
   }
@@ -2062,42 +2134,72 @@ public class Stables
       return;
     }
     setup = true;
-    
-    writeDB("CREATE TABLE IF NOT EXISTS " + getConfig().getString("MySQL.prefix") + "horses ( id double PRIMARY KEY, uid text, owner text, tamed long, named text, x double, y double, z double, world text ) ");
-    writeDB("CREATE TABLE IF NOT EXISTS " + getConfig().getString("MySQL.prefix") + "riders ( id double PRIMARY KEY, uid text, name text, owner text, horse_id integer ) ");
-    writeDB("CREATE TABLE IF NOT EXISTS " + getConfig().getString("MySQL.prefix") + "stable ( id double PRIMARY KEY, uid text, name text, owner text, health integer, type integer, chested boolean, bred boolean, variant integer, temper integer, tamed boolean, saddled boolean, armoritem integer)");
-    
-    writeDB("CREATE TABLE IF NOT EXISTS " + getConfig().getString("MySQL.prefix") + "auction ( id double PRIMARY KEY, bid double, bidder string, end long, type integer, var intenger, sold_to string)");
-    writeDB("CREATE TABLE IF NOT EXISTS " + getConfig().getString("MySQL.prefix") + "return_bids ( id double PRIMARY KEY, bid double, bidder string)");
-    
-    AddCol(getConfig().getString("MySQL.prefix") + "riders", "horse_id", "integer");
-    AddCol(getConfig().getString("MySQL.prefix") + "stable", "name", "text");
-    AddCol(getConfig().getString("MySQL.prefix") + "stable", "owner", "text");
-    AddCol(getConfig().getString("MySQL.prefix") + "stable", "str", "double");
-    AddCol(getConfig().getString("MySQL.prefix") + "horses", "world", "text");
-    
-
-    AddCol(getConfig().getString("MySQL.prefix") + "horses", "owneruuid", "text");
-    AddCol(getConfig().getString("MySQL.prefix") + "stable", "owneruuid", "text");
-    AddCol(getConfig().getString("MySQL.prefix") + "riders", "owneruuid", "text");
-    AddCol(getConfig().getString("MySQL.prefix") + "riders", "rideruuid", "text");
-    
-
-    writeDB("DROP TABLE IF EXISTS " + getConfig().getString("MySQL.prefix") + "owners;");
-    if (getConfig().getBoolean("MySQL.useMySQL"))
+    if (getConfig().getInt("configVersion") <= 0)
     {
-      writeDB("ALTER TABLE " + getConfig().getString("MySQL.prefix") + "horses  CHANGE  `id`  `id` DOUBLE NOT NULL AUTO_INCREMENT");
-      writeDB("ALTER TABLE " + getConfig().getString("MySQL.prefix") + "riders  CHANGE  `id`  `id` DOUBLE NOT NULL AUTO_INCREMENT");
-      writeDB("ALTER TABLE " + getConfig().getString("MySQL.prefix") + "stable  CHANGE  `id`  `id` DOUBLE NOT NULL AUTO_INCREMENT");
-      writeDB("ALTER TABLE " + getConfig().getString("MySQL.prefix") + "horses  CHANGE  `tamed`  `tamed` LONG");
+
+      writeDB("CREATE TABLE IF NOT EXISTS " + getConfig().getString("MySQL.prefix") + "horses ( id double PRIMARY KEY, uid text, owner text, tamed long, named text, x double, y double, z double, world text ) ");
+      writeDB("CREATE TABLE IF NOT EXISTS " + getConfig().getString("MySQL.prefix") + "riders ( id double PRIMARY KEY, uid text, name text, owner text, horse_id integer ) ");
+      writeDB("CREATE TABLE IF NOT EXISTS " + getConfig().getString("MySQL.prefix") + "stable ( id double PRIMARY KEY, uid text, name text, owner text, health integer, type integer, chested boolean, bred boolean, variant integer, temper integer, tamed boolean, saddled boolean, armoritem integer)");
+      
+
+      writeDB("CREATE TABLE IF NOT EXISTS " + getConfig().getString("MySQL.prefix") + "auction ( id double PRIMARY KEY, bid double, bidder string, end long, type integer, var intenger, sold_to string)");
+      writeDB("CREATE TABLE IF NOT EXISTS " + getConfig().getString("MySQL.prefix") + "return_bids ( id double PRIMARY KEY, bid double, bidder string)");
+      
+
+      AddCol(getConfig().getString("MySQL.prefix") + "riders", "horse_id", "integer");
+      AddCol(getConfig().getString("MySQL.prefix") + "stable", "name", "text");
+      AddCol(getConfig().getString("MySQL.prefix") + "stable", "owner", "text");
+      AddCol(getConfig().getString("MySQL.prefix") + "stable", "str", "double");
+      AddCol(getConfig().getString("MySQL.prefix") + "horses", "world", "text");
+      
+
+
+      AddCol(getConfig().getString("MySQL.prefix") + "horses", "owneruuid", "text");
+      AddCol(getConfig().getString("MySQL.prefix") + "stable", "owneruuid", "text");
+      AddCol(getConfig().getString("MySQL.prefix") + "riders", "owneruuid", "text");
+      AddCol(getConfig().getString("MySQL.prefix") + "riders", "rideruuid", "text");
+      
+
+
+      writeDB("DROP TABLE IF EXISTS " + getConfig().getString("MySQL.prefix") + "owners;");
+      if (getConfig().getBoolean("MySQL.useMySQL"))
+      {
+        writeDB("ALTER TABLE " + getConfig().getString("MySQL.prefix") + "horses  CHANGE  `id`  `id` DOUBLE NOT NULL AUTO_INCREMENT");
+        writeDB("ALTER TABLE " + getConfig().getString("MySQL.prefix") + "riders  CHANGE  `id`  `id` DOUBLE NOT NULL AUTO_INCREMENT");
+        writeDB("ALTER TABLE " + getConfig().getString("MySQL.prefix") + "stable  CHANGE  `id`  `id` DOUBLE NOT NULL AUTO_INCREMENT");
+        writeDB("ALTER TABLE " + getConfig().getString("MySQL.prefix") + "horses  CHANGE  `tamed`  `tamed` LONG");
+      }
     }
+    if (getConfig().getInt("configVersion") < 1)
+    {
+      info("Config version 1: Adding UUID tables....");
+      writeDB("CREATE TABLE IF NOT EXISTS " + dbprefix + 
+        "uuid ( uuid varchar(40) PRIMARY KEY, who text) ");
+      getConfig().set("configVersion", Integer.valueOf(1));
+      saveConfig();
+
+
+
+
+    }
+    info("Database up to date!");
+    saveConfig();
+  }
+  
+  public void info(Object msg)
+  {
+    String txt = "[Stables] " + msg.toString();
+    Bukkit.getServer().getLogger().info(txt.replaceAll("&([0-9A-Fa-f])", "ยง$1"));
   }
   
   public void writeDB(String query)
   {
     try
     {
-      if (this.conn == null) {
+      if ((this.conn == null) || (this.conn.isClosed()))
+      {
+        info("Database closed - attempting to reopen!");
+
         OpenDatabase();
       }
       Statement statement = this.conn.createStatement();
@@ -2163,7 +2265,9 @@ public class Stables
     {
       if (this.conn != null)
       {
-        this.rs.close();
+        if (this.rs != null) {
+          this.rs.close();
+        }
         this.conn.close();
       }
     }
@@ -2178,7 +2282,7 @@ public class Stables
     if (p == null) {
       return;
     }
-    local(p, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("HIT_STORE", null));
+    msg(p, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("HIT_STORE", null));
     p.setMetadata("stables.store", new FixedMetadataValue(plugin, Boolean.valueOf(true)));
     Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable()
     {
@@ -2251,18 +2355,18 @@ public class Stables
     int randomNum = generator.nextInt(100) + 1;
     if (disabledWorld("horses.lure.useEnabled", "horses.lure.disabled", player.getWorld().getName()))
     {
-      local(player, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("DISABLED_WORLD", null));
+      msg(player, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("DISABLED_WORLD", null));
       return;
     }
     if (!enabledWorld("horses.lure.useEnabled", "horses.lure.enabled", player.getWorld().getName()))
     {
-      local(player, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("DISABLED_WORLD", null));
+      msg(player, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("DISABLED_WORLD", null));
       return;
     }
     debug("Num: " + randomNum + " - Chance = " + getConfig().getInt(new StringBuilder("lure.").append(itemId).append(".chance").toString()));
     if (randomNum > getConfig().getInt("lure." + itemId + ".chance"))
     {
-      local(player, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("LURE_FAIL", null));
+      msg(player, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("LURE_FAIL", null));
       return;
     }
     HorseModifier hm = HorseModifier.spawn(player.getLocation());
@@ -2326,7 +2430,7 @@ public class Stables
   {
     if (!isHorse(e))
     {
-      local(p, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("ADD_ERROR", null));
+      msg(p, ChatColor.GREEN + "[" + ChatColor.DARK_GREEN + "Stables" + ChatColor.GREEN + "] " + ChatColor.WHITE + getLang("ADD_ERROR", null));
       return false;
     }
     if (!canTame(p)) {
@@ -2449,97 +2553,100 @@ public class Stables
   
   private void setupLanguage()
   {
-	    setLang("SYNTAX", "Syntax is: ");
-	    setLang("ADD_HIT", "Punch the horse you want to add the rider to.");
-	    setLang("ADD_NOARG", "Who do you want to add as a rider?");
-	    setLang("CONFIG_ERROR", "Could not save config to");
-	    setLang("CONFIG_RELOAD", "Stables configuration reloaded.");
-	    setLang("CONFIG_SAVE", "Horses saved.");
-	    setLang("DEL_HIT", "Punch the horse you want to delete the rider from.");
-	    setLang("DEL_NOARG", "Who do you want to delete as a rider?");
-	    setLang("HIT_FREE", "You set this beast free.");
-	    setLang("HIT_MAX", "You already own too many horses! You cannot tame this beast.");
-	    setLang("HIT_NEW", "Enjoy your new steed!");
-	    setLang("HIT_REMOVE", "Punch the horse you want to remove the owner from.");
-	    setLang("LIST_NOARG", "Who do you wish to list the horses of?");
-	    setLang("LIST_OWNED", "owns the following horses:");
-	    setLang("NO_CONSOLE", "This command cannot be run from the console.");
-	    setLang("NO_PERM", "You do not have permission for that.");
-	    setLang("NOT_OWNER", "That is not even your horse!");
-	    setLang("PERM_NOCLEAR", "That is not your horse! You cannot set it free!");
-	    setLang("PERM_NORIDE", "You have not been given permission to ride that horse!");
-	    setLang("PERM_NOTHEFT", "That is not your horse! That belongs to %1");
-	    setLang("RECIPE_ADDED", "Recipe added:");
-	    setLang("REMOVE_NOARG", "Who do you wish to remove the horses of?");
-	    setLang("REMOVE_NOHORSE", "That player owns no horses.");
-	    setLang("RIDER_ADD", "Rider added!");
-	    setLang("RIDER_ADD_FAILED", "The UUID of that player could not be found. Please try again.");
-	    setLang("RIDER_DEL", "Rider removed.");
-	    setLang("RO_HIT", "Punch the horse you want to remove the owner of.");
-	    setLang("UNKNOWN_OWNER", "That owner is unknown.");
-	    
-	    setLang("SUMMON_HORSE", "You summon your steed to your location.");
-	    setLang("CHECK_HIT", "Punch the horse you want to check the info of.");
-	    setLang("LIST_NOHORSE", "That player owns no horses.");
-	    setLang("HORSE_UNKNOWN", "A horse by that name was not located.");
-	    setLang("HORSE_NOT_FOUND", "Your steed could not be located.");
-	    setLang("TP_FOUND", "You teleport to your steed's last known location.");
-	    setLang("COMMAND_DISABLED", "A mystical force prevents you from doing this.");
-	    setLang("HORSE_WRONG_WORLD", "Your steed was not found in this world.");
-	    setLang("COMPASS_LOCKED", "Your compass has locked in to your steed's last location.");
-	    setLang("DISABLED_WORLD", "You are unable to do that here!");
-	    setLang("TOO_POOR", "You are unable to afford the stable master's fee of $%1");
-	    setLang("FEE_COLLECT", "The stable master collects his fee of $%1");
-	    setLang("MASTER_STORE", "The stable master leads your horse into a stall.");
-	    setLang("TOO_MANY_HORSES", "You already own too many horses! You cannot tame this beast.");
-	    setLang("HIT_STORE", "Hit the horse you wish to store.");
-	    setLang("LURE_FAIL", "You failed to lure any horses out.");
-	    setLang("EXIT_NOT_TAME", "This horse has not yet been named, and is not claimed by you. Use a name tag to claim it for your own!");
-	    setLang("PUNISH_BREED", "Your ability to breed horses has been revoked.");
-	    setLang("PUNISH_NAME", "Your ability to name horses has been revoked.");
-	    setLang("NOT_RIDER", "%1 has not given you permission to ride that horse!");
-	    setLang("SET_FREE", "You set this beast free.");
-	    setLang("NEW_STEED", "Enjoy your new steed!");
-	    setLang("REMOVE_CHEST", "You have removed the chest from your steed.");
-	    setLang("NO_CHESTS", "The stable master cannot be held responsible for a horse's inventory, and refuses to stable your steed at this time. You may use /stables removechest instead.");
-	    setLang("ALREADY_LURE", "Shh! You're already trying to lure out a horse!");
-	    setLang("START_LURE", "You begin trying to lure out a horse ...");
-	    setLang("RECIPE_PERM", "You do not have the knowledge to craft that item!");
-	    setLang("HORSE_ABANDON", "You abandon your steed.");
-	    setLang("HORSE_ABANDON_NOT_FOUND", "You abandon your steed. Note: The physical horse was not located. As such, it may remain 'named', but is no longer claimed by you.");
-	    setLang("CMD_NAME", "Change the name of (player)'s horse to (new name)");
-	    setLang("CMD_ADD", "Add (rider) to your horse");
-	    setLang("CMD_DEL", "Remove (rider) from your horse");
-	    setLang("CMD_LIST", "List all of your own horses");
-	    setLang("CMD_ABANDON", "Free (horse) from your ownership");
-	    setLang("CMD_VIEW", "Show all horses in your virtual stables");
-	    setLang("CMD_STORE", "Store a horse in your virtual stables");
-	    setLang("CMD_RECOVER", "Recover horse # from your virtual stables. Requires #, NOT NAME");
-	    setLang("CMD_FIND", "Point a compass to your horse's last location");
-	    setLang("CMD_SUMMON", "Summon your horse to your location");
-	    setLang("CMD_TP", "Teleport to your horse's last location");
-	    setLang("CMD_CHECK", "View a horse's information & owner");
-	    setLang("CMD_RO", "Remove a horse's owner");
-	    setLang("CMD_LISTALL", "View all of (player)'s horses");
-	    setLang("CMD_CLEAR", "Remove ALL horses owned by (player)");
-	    setLang("CMD_RELOAD", "Reload the config file - will not change database options");
-	    setLang("CMD_SAVE", "Force a save of the horse database");
-	    setLang("CMD_CONFIG", "Alter config options");
-	    setLang("CMD_CONVERT", "Convert Flatfile YAML config to SQL");
-	    setLang("CMD_RENAME", "Rename a horse from a random list of names");
-	    setLang("ADD_ERROR", "That is not a horse! You cannot claim it!");
-	    setLang("ADD_AUTO", "You have claimed this steed as your own!");
-	    setLang("NEW_NAME", "You have given your steed a new name!");
-	    setLang("RENAME_NOT_FOUND", "Your horse couldn't be found near by - are you too far away?");
-	    setLang("RECOVER_WG", "This area is protected! The stablemaster will not deliver here!");
-	    
-	    setLang("STABLES_RETURNOK", "The stable master waders off to the stalls, then returns with %1");
-	    setLang("STABLES_LISTING", "You have the following horses in your stables:");
-	    setLang("STABLES_RECOVERWHO", "Which horse did you want to recover?");
-	    setLang("STABLES_RECOVERWHO2", "Type /stables recover (name)");
-	    setLang("STABLES_TIMEOUT", "Stable storage timeout.");
-	    setLang("STABLES_RECOVERSIGN1", "Use /recover");
-	    setLang("STABLES_RECOVERSIGN2", "to retreive!");
+    setLang("SYNTAX", "Syntax is: ");
+    setLang("ADD_HIT", "Punch the horse you want to add the rider to.");
+    setLang("ADD_NOARG", "Who do you want to add as a rider?");
+    setLang("CONFIG_ERROR", "Could not save config to");
+    setLang("CONFIG_RELOAD", "Stables configuration reloaded.");
+    setLang("CONFIG_SAVE", "Horses saved.");
+    setLang("DEL_HIT", "Punch the horse you want to delete the rider from.");
+    setLang("DEL_NOARG", "Who do you want to delete as a rider?");
+    setLang("HIT_FREE", "You set this beast free.");
+    setLang("HIT_MAX", "You already own too many horses! You cannot tame this beast.");
+    setLang("HIT_NEW", "Enjoy your new steed!");
+    setLang("HIT_REMOVE", "Punch the horse you want to remove the owner from.");
+    setLang("LIST_NOARG", "Who do you wish to list the horses of?");
+    setLang("LIST_OWNED", "owns the following horses:");
+    setLang("NO_CONSOLE", "This command cannot be run from the console.");
+    setLang("NO_PERM", "You do not have permission for that.");
+    setLang("NOT_OWNER", "That is not even your horse!");
+    setLang("PERM_NOCLEAR", "That is not your horse! You cannot set it free!");
+    setLang("PERM_NORIDE", "You have not been given permission to ride that horse!");
+    setLang("PERM_NOTHEFT", "That is not your horse! That belongs to %1");
+    setLang("RECIPE_ADDED", "Recipe added:");
+    setLang("REMOVE_NOARG", "Who do you wish to remove the horses of?");
+    setLang("REMOVE_NOHORSE", "That player owns no horses.");
+    setLang("RIDER_ADD", "Rider added!");
+    setLang("RIDER_ADD_FAILED", "The UUID of that player could not be found. Please try again.");
+    setLang("RIDER_DEL", "Rider removed.");
+    setLang("RO_HIT", "Punch the horse you want to remove the owner of.");
+    setLang("UNKNOWN_OWNER", "That owner is unknown.");
+    
+
+    setLang("SUMMON_HORSE", "You summon your steed to your location.");
+    setLang("SUMMON_HORSE_DIFFWORLD", "You cannot call your steed from another world!");
+    setLang("CHECK_HIT", "Punch the horse you want to check the info of.");
+    setLang("LIST_NOHORSE", "That player owns no horses.");
+    setLang("HORSE_UNKNOWN", "A horse by that name was not located.");
+    setLang("HORSE_NOT_FOUND", "Your steed could not be located.");
+    setLang("TP_FOUND", "You teleport to your steed's last known location.");
+    setLang("COMMAND_DISABLED", "A mystical force prevents you from doing this.");
+    setLang("HORSE_WRONG_WORLD", "Your steed was not found in this world.");
+    setLang("COMPASS_LOCKED", "Your compass has locked in to your steed's last location.");
+    setLang("DISABLED_WORLD", "You are unable to do that here!");
+    setLang("TOO_POOR", "You are unable to afford the stable master's fee of $%1");
+    setLang("FEE_COLLECT", "The stable master collects his fee of $%1");
+    setLang("MASTER_STORE", "The stable master leads your horse into a stall.");
+    setLang("TOO_MANY_HORSES", "You already own too many horses! You cannot tame this beast.");
+    setLang("HIT_STORE", "Hit the horse you wish to store.");
+    setLang("LURE_FAIL", "You failed to lure any horses out.");
+    setLang("EXIT_NOT_TAME", "This horse has not yet been named, and is not claimed by you. Use a name tag to claim it for your own!");
+    setLang("PUNISH_BREED", "Your ability to breed horses has been revoked.");
+    setLang("PUNISH_NAME", "Your ability to name horses has been revoked.");
+    setLang("NOT_RIDER", "%1 has not given you permission to ride that horse!");
+    setLang("SET_FREE", "You set this beast free.");
+    setLang("NEW_STEED", "Enjoy your new steed!");
+    setLang("REMOVE_CHEST", "You have removed the chest from your steed.");
+    setLang("NO_CHESTS", "The stable master cannot be held responsible for a horse's inventory, and refuses to stable your steed at this time. You may use /stables removechest instead.");
+    setLang("ALREADY_LURE", "Shh! You're already trying to lure out a horse!");
+    setLang("START_LURE", "You begin trying to lure out a horse ...");
+    setLang("RECIPE_PERM", "You do not have the knowledge to craft that item!");
+    setLang("HORSE_ABANDON", "You abandon your steed.");
+    setLang("HORSE_ABANDON_NOT_FOUND", "You abandon your steed. Note: The physical horse was not located. As such, it may remain 'named', but is no longer claimed by you.");
+    setLang("CMD_NAME", "Change the name of (player)'s horse to (new name)");
+    setLang("CMD_ADD", "Add (rider) to your horse");
+    setLang("CMD_DEL", "Remove (rider) from your horse");
+    setLang("CMD_LIST", "List all of your own horses");
+    setLang("CMD_ABANDON", "Free (horse) from your ownership");
+    setLang("CMD_VIEW", "Show all horses in your virtual stables");
+    setLang("CMD_STORE", "Store a horse in your virtual stables");
+    setLang("CMD_RECOVER", "Recover horse # from your virtual stables. Requires #, NOT NAME");
+    setLang("CMD_FIND", "Point a compass to your horse's last location");
+    setLang("CMD_SUMMON", "Summon your horse to your location");
+    setLang("CMD_TP", "Teleport to your horse's last location");
+    setLang("CMD_CHECK", "View a horse's information & owner");
+    setLang("CMD_RO", "Remove a horse's owner");
+    setLang("CMD_LISTALL", "View all of (player)'s horses");
+    setLang("CMD_CLEAR", "Remove ALL horses owned by (player)");
+    setLang("CMD_RELOAD", "Reload the config file - will not change database options");
+    setLang("CMD_SAVE", "Force a save of the horse database");
+    setLang("CMD_CONFIG", "Alter config options");
+    setLang("CMD_CONVERT", "Convert Flatfile YAML config to SQL");
+    setLang("CMD_RENAME", "Rename a horse from a random list of names");
+    setLang("ADD_ERROR", "That is not a horse! You cannot claim it!");
+    setLang("ADD_AUTO", "You have claimed this steed as your own!");
+    setLang("NEW_NAME", "You have given your steed a new name!");
+    setLang("RENAME_NOT_FOUND", "Your horse couldn't be found near by - are you too far away?");
+    setLang("RECOVER_WG", "This area is protected! The stablemaster will not deliver here!");
+    
+
+    setLang("STABLES_RETURNOK", "The stable master waders off to the stalls, then returns with %1");
+    setLang("STABLES_LISTING", "You have the following horses in your stables:");
+    setLang("STABLES_RECOVERWHO", "Which horse did you want to recover?");
+    setLang("STABLES_RECOVERWHO2", "Type /stables recover (name)");
+    setLang("STABLES_TIMEOUT", "Stable storage timeout.");
+    setLang("STABLES_RECOVERSIGN1", "Use /recover");
+    setLang("STABLES_RECOVERSIGN2", "to retreive!");
     
 
     savelocalConfig();

@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -13,6 +15,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
@@ -38,14 +42,17 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityUnleashEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.Recipe;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
@@ -65,6 +72,23 @@ public class EventListener
       Bukkit.getServer().getLogger().info("Stables DEBUG: " + msg);
     }
   }
+  
+  @EventHandler
+  public void onPlayerLogin(PlayerLoginEvent event)
+  {
+    Player p = event.getPlayer();
+    String query = "";
+    if (this.plugin.getConfig().getBoolean("MySQL.useSQLite")) {
+      query = 
+      
+        "INSERT OR IGNORE INTO " + Stables.dbprefix + "uuid ( who, uuid ) VALUES('" + p.getName().toLowerCase() + "','" + p.getUniqueId().toString() + "');" + "UPDATE " + Stables.dbprefix + "uuid SET who='" + p.getName().toLowerCase() + "' WHERE uuid LIKE '" + p.getUniqueId().toString() + "';";
+    } else {
+      query = 
+        "INSERT INTO " + Stables.dbprefix + "uuid ( who, uuid ) VALUES('" + p.getName().toLowerCase() + "','" + p.getUniqueId().toString() + "') ON DUPLICATE KEY UPDATE who='" + p.getName().toLowerCase() + "';";
+    }
+    this.plugin.writeDB(query);
+  }
+  
   @EventHandler
   public void onVehicleExit(VehicleExitEvent event)
   {
@@ -122,6 +146,8 @@ public class EventListener
         if ((h.getType() == EntityType.PAINTING) || (h.getType() == EntityType.ITEM_FRAME)) {
           return;
         }
+       // debug(h.getUniqueId());
+        return;
       }
       return;
     }
@@ -256,7 +282,7 @@ public class EventListener
       }
     }
   }
-  //general.PVPMountedDamage
+   //general.PVPMountedDamage
   @EventHandler(priority = EventPriority.HIGHEST)
 	public void onDamage(EntityDamageEvent event)
 	{
@@ -267,7 +293,7 @@ public class EventListener
 					{
 			if(horse.getPassenger() != null)
 			{
-					if(horse.isTamed())
+					//if(horse.isTamed())
 						event.setCancelled(false);
 				}
 				
@@ -280,7 +306,7 @@ public class EventListener
 				Horse horse = (Horse) event.getEntity();
 				if(horse.getPassenger() != null)
 				{
-						if(horse.isTamed())
+						//if(horse.isTamed())
 							event.setCancelled(true);
 					}
 					
@@ -381,6 +407,7 @@ public class EventListener
       p.sendMessage(ChatColor.GREEN + "Horse Name: " + ChatColor.WHITE + t.getCustomName());
       p.sendMessage(ChatColor.GREEN + "Jump Strength: " + ChatColor.WHITE + t.getJumpStrength());
       p.sendMessage(ChatColor.GREEN + "Health: " + ChatColor.WHITE + t.getHealth() + ChatColor.GREEN + "/" + ChatColor.WHITE + t.getMaxHealth());
+
       return;
     }
     if (((event.getDamager() instanceof Player)) && (event.getDamager().hasMetadata("stables.removeowner")))
@@ -421,7 +448,8 @@ public class EventListener
         event.setCancelled(true);
         return;
       }
-      String query = "INSERT INTO " + this.plugin.getConfig().getString("MySQL.prefix") + "riders (uid, name, owner, horse_id,owneruuid,rideruuid) VALUES('" + e.getUniqueId() + "','" + name + "','" + p.getName() + "', '', '" + p.getUniqueId() + "','" + riderid + "');";
+      String query = "INSERT INTO " + this.plugin.getConfig().getString("MySQL.prefix") + "riders (uid, name, owner, owneruuid,rideruuid) VALUES('" + e.getUniqueId() + "','" + name + "','" + p.getName() + "', '" + p.getUniqueId() + "','" + riderid + "');";
+      this.plugin.info(query);
       this.plugin.writeDB(query);
       this.plugin.local(p, "RIDER_ADD");
       p.removeMetadata("stables.addrider", this.plugin);
@@ -577,6 +605,7 @@ public class EventListener
     debug("No damage issues - letting damage go through. " + event.getDamage());
     event.setCancelled(false);
   }
+  
   @EventHandler
   public void onPlayerInteractBlock(PlayerInteractEvent event)
   {
@@ -711,6 +740,34 @@ public class EventListener
       return;
     }
   }
+  
+  @EventHandler(ignoreCancelled=true)
+  public void onInteractBlock(PlayerInteractEvent event)
+  {
+    if ((event.getPlayer() == null) || (event.getClickedBlock() == null) || (event.getItem() == null)) {
+      return;
+    }
+    if (!this.plugin.getConfig().getBoolean("items.deconstruct.allow")) {
+      return;
+    }
+    Player p = event.getPlayer();
+    Block b = event.getClickedBlock();
+    ItemStack item = event.getItem();
+    int itemid = item.getTypeId();
+    boolean found = false;
+    Material anvil = Material.getMaterial(this.plugin.getConfig().getString("items.deconstruct.item"));
+    if (b.getType() != anvil) {
+      return;
+    }
+    switch (itemid)
+    {
+    default: 
+      return;
+    }
+  }
+  
+  @EventHandler
+  public void onInventoryClick(InventoryClickEvent e) {}
   
   public List<String> onTabComplete(CommandSender arg0, Command arg1, String arg2, String[] arg3)
   {

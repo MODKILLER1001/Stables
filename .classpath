@@ -2,6 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/Joe/.m2/repository/org/bukkit/bukkit/1.7.9-R0.1-SNAPSHOT/bukkit-1.7.9-R0.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Joe/.m2/repository/org/bukkit/bukkit/1.8-R0.1-SNAPSHOT/bukkit-1.8-R0.1-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="D:/Minecraft Stuff/New folder/spigot.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Joe/.m2/repository/com/sk89q/worldguard/6.0.0-SNAPSHOT/worldguard-6.0.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Joe/.m2/repository/net/milkbowl/vault/VaultAPI/1.4/VaultAPI-1.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Joe/.m2/repository/com/sk89q/worldedit/6.0.0-SNAPSHOT/worldedit-6.0.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

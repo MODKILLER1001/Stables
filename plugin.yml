@@ -1,0 +1,108 @@
+name: Stables
+main: me.raum.stables.Stables
+version: 1.9.5-Banxsi.com
+author: Raum and externo6
+description: Stables-The horse protection plugin with virtual stables and much more!
+
+
+permissions:
+   stables.*:
+      description: Gives access to all permission nodes in Stables
+   stables.helper:
+      description: Not quite an admin, but able to do some adminy-like-things
+      default: op
+   stables.admin:
+      description: Provides admin control to horses
+      default: op
+   stables.name:
+      description: Allow access to /stables rename
+      default: op
+   stables.info:
+      description: Allows access to /stables check and /stables listhorses
+      default: op
+   stables.remove:
+      description: Allows access to /stables removeowner (and /ro)
+      default: op 
+   stables.addrider:
+      description: Allows a player to add riders to a horse that isn't their own
+      default: op 
+   stables.clear:
+      description: Allows access to /stables clearhorses
+      default: op
+   stables.spawn:
+      description: /spawnhorse
+      default: op
+   stables.sign:
+      description: Allows creation of [Stable] signs
+      default: op
+   stables.ride:
+      description: Allows you to ride any horse
+      default: op
+   stables.dismount:
+      description: Allows you force a player to dismount
+      default: op
+   stables.punish.name:
+      description: Does not allow hose naming.
+      default: false
+   stables.punish.breed:
+      description: Does not allow hose naming.
+      default: false
+   stables.punish.ride:
+      description: Does not allow hose naming.
+      default: false
+   stables.tp:
+      description: Allow someone to TP to their horse
+      default: op
+   stables.summon:
+      description: Allow someone to find their horse
+      default: op
+   stables.summon.world:
+      description: Allow someone to find their horse
+      default: op
+   stables.find:
+      description: Allow someone to summon their horse
+      default: op
+   stables.max.*:
+      description: The MaxOwner control for Stables
+      default: false
+   stables.recipe.nametag:
+      description: Allows creation of name tags.
+      default: op
+   stables.recipe.armor.iron:
+      description: Allows creation of iron armor.
+      default: op
+   stables.recipe.armor.gold:
+      description: Allows creation of golden armor.
+      default: op
+   stables.recipe.armor.diamond:
+      description: Allows creation of diamond armor.
+      default: op
+   stables.recipe.saddle:
+      description: Allows creation of saddles.
+      default: op
+    
+   
+commands:
+   stables:
+      description: Main commands for the Stables Plugin
+      usage: /stables <options> - use /stables help for a list of options.
+   view:
+      description: View any Stabled horses
+      usage: /view - Use /recover to recover a stabled horse!
+   recover:
+      description: Recover stabled horse #
+      usage: /recover (Horse#) - Use /view to see all stored horses.
+   ro:
+      description: Remove owner of a horse
+      usage: Type /ro, then click the horse you wish to remove the owner of.
+      permission: stables.admin
+      permission-message: You are unable to remove the owner of a horse!
+   spawnhorse:
+      description: Spawn a random tamed, saddled horse
+      usage: /spawnhorse (zombie/skeleton)
+      permission: stables.spawn
+      permission-message: You are unable to do that!
+   rename:
+      aliases: [newname,newname,name]
+      description: Change the name of a horse to a random new name
+      default: true
